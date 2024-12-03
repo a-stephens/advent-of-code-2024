@@ -1,0 +1,11 @@
+FROM gcc:latest
+
+WORKDIR /app
+
+COPY number_pairing.cpp /app
+COPY example_input.txt /app
+COPY input.txt /app
+
+RUN g++ -o number_pairer number_pairing.cpp
+
+CMD ["./number_pairer", "input.txt"]
