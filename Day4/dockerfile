@@ -1,0 +1,15 @@
+FROM node:21
+
+WORKDIR /app
+
+# COPY package*.json ./
+
+# RUN npm install
+
+COPY example_input.txt ./
+COPY input.txt ./
+COPY ceres-search.js ./
+
+# EXPOSE 3000
+
+CMD [ "node", "ceres-search.js" ]
