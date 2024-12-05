@@ -1,28 +1,64 @@
-function isSafe(levels, lowerBound, upperBound) {
-    let hadBadLevel = false;
-    let isAllIncreasing = true;
-    let isAllDecreasing = true;
-    for (let i = 0; i < levels.length - 1; i++) {
-        let levelDifference = Math.abs(levels[i] - levels[i + 1]);
-        let withinBounds = levelDifference >= lowerBound && levelDifference <= upperBound;
-        let isDecreasing = levels[i + 1] < levels[i];
-        let isIncreasing = levels[i + 1] > levels[i];
-        let hasBadLevel = !withinBounds;
-        if (isAllIncreasing) {
-            hasBadLevel = hasBadLevel || isIncreasing;
-        } else if (isAllDecreasing) {
-            hasBadLevel = hasBadLevel || isDecreasing;
-        }
-        if (hadBadLevel && hasBadLevel) {
+function isAllIncreasing(levels) {
+    for (let i = 1; i < levels.length; i++) {
+        if (levels[i] <= levels[i - 1]) {
             return false;
-        } else if (hasBadLevel) {
-            hadBadLevel = true;
+        }
+    }
+    return true;
+}
+
+function isAllDecreasing(levels) {
+    for (let i = 1; i < levels.length; i++) {
+        if (levels[i] >= levels[i - 1]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function isSafe(levels, lowerBound, upperBound) {
+    for (let i = 1; i < levels.length; i++) {
+        let levelDifference = Math.abs(levels[i] - levels[i - 1]);
+        let withinBounds = levelDifference >= lowerBound && levelDifference <= upperBound;
+        if (!withinBounds) {
+            return false;
+        }
+    }
+    if (!(isAllIncreasing(levels) || isAllDecreasing(levels))) {
+        return false;
+    }
+
+    return true;
+}
+
+function isSafeDampened(levels, lowerBound, upperBound) {
+    let numErrors = 0;
+    let isAllInc = true;
+    let isAllDec = true;
+    for (let i = 1; i < levels.length;) {
+        let levelDifference = Math.abs(levels[i] - levels[i - 1]);
+        let withinBounds = levelDifference >= lowerBound && levelDifference <= upperBound;
+        let isInc = levels[i] > levels[i - 1];
+        let isDec = levels[i] < levels[i - 1];
+        if (!withinBounds && numErrors >= 1) {
+            return false;
+        } else if (!withinBounds) {
+            numErrors++;
+            levels.splice(i, 1);
             continue;
         }
-        isAllIncreasing = isAllIncreasing && isIncreasing;
-        isAllDecreasing = isAllDecreasing && isDecreasing;
+        let tmpIsAllInc = isAllInc && isInc;
+        let tmpIsAllDec = isAllDec && isDec;
+        if (!(tmpIsAllInc || tmpIsAllDec)) {
+            numErrors++;
+            levels.splice(i, 1);
+            continue;
+        }
+        isAllInc = isAllInc && isInc;
+        isAllDec = isAllDec && isDec;
+        i++;
     }
-    if (!(isAllIncreasing || isAllDecreasing)) {
+    if (!(isAllInc || isAllDec)) {
         return false;
     }
 
@@ -44,10 +80,20 @@ function readInput(filepath) {
 }
 
 let reports = readInput("example_input.txt");
+console.log("Part one:");
 let counter = 0;
 for (const report of reports) {
     if (isSafe(report, 1, 3)) {
         counter++;
     }
 }
-console.log(counter)
+console.log("Safe reports: " + counter);
+
+console.log("Part two:");
+counter = 0;
+for (const report of reports) {
+    if (isSafeDampened(report, 1, 3)) {
+        counter++;
+    }
+}
+console.log("Safe reports: " + counter);
