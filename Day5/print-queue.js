@@ -13,6 +13,32 @@ function checkOrdering(orderings, update) {
     return true;
 }
 
+function enforceOrdering(orderings, pages) {
+    let newPages = Array.from(pages);
+    let isNotOrdered = !checkOrdering(orderings, newPages);
+    let maxIterations = 3000;
+    let i = 0;
+    while (isNotOrdered) {
+        for (const order of orderings) {
+            let page1loc = newPages.indexOf(order[0]);
+            let page2loc = newPages.indexOf(order[1]);
+            if (page1loc === -1 || page2loc === -1) {
+                continue;
+            }
+            if (page1loc < page2loc) {
+                newPages.splice(page2loc, 1);
+                newPages.splice(page1loc, 0, order[1]);
+            }
+        }
+        isNotOrdered = !checkOrdering(orderings, newPages);
+        if (i > maxIterations) {
+            break;
+        }
+        i++;
+    }
+    return newPages;
+}
+
 function getMiddlePage(update) {
     if (update.length === 0) {
         return null;
@@ -26,9 +52,12 @@ function performUpdates(orderings, pages) {
     let total = 0;
     for (const update of pages) {
         let ordered = checkOrdering(orderings, update);
-        if (ordered) {
-            let middle = getMiddlePage(update);
-            console.log("Middle: " + middle);
+        if (!ordered) {
+            console.log("Update: " + update);
+            let newUpdate = enforceOrdering(orderings, update);
+            console.log("New Update: " + newUpdate);
+            console.log("");
+            let middle = getMiddlePage(newUpdate);
             total += middle;
         }
     }
@@ -61,3 +90,4 @@ function readInput(filepath) {
 
 let [pageOrdering, pagesToProduce] = readInput("input.txt");
 console.log(performUpdates(pageOrdering, pagesToProduce));
+
