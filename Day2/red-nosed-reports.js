@@ -32,37 +32,20 @@ function isSafe(levels, lowerBound, upperBound) {
 }
 
 function isSafeDampened(levels, lowerBound, upperBound) {
-    let numErrors = 0;
-    let isAllInc = true;
-    let isAllDec = true;
-    for (let i = 1; i < levels.length;) {
-        let levelDifference = Math.abs(levels[i] - levels[i - 1]);
-        let withinBounds = levelDifference >= lowerBound && levelDifference <= upperBound;
-        let isInc = levels[i] > levels[i - 1];
-        let isDec = levels[i] < levels[i - 1];
-        if (!withinBounds && numErrors >= 1) {
-            return false;
-        } else if (!withinBounds) {
-            numErrors++;
-            levels.splice(i, 1);
-            continue;
-        }
-        let tmpIsAllInc = isAllInc && isInc;
-        let tmpIsAllDec = isAllDec && isDec;
-        if (!(tmpIsAllInc || tmpIsAllDec)) {
-            numErrors++;
-            levels.splice(i, 1);
-            continue;
-        }
-        isAllInc = isAllInc && isInc;
-        isAllDec = isAllDec && isDec;
-        i++;
-    }
-    if (!(isAllInc || isAllDec)) {
-        return false;
+    if (isSafe(levels, lowerBound, upperBound)) {
+        return true;
     }
 
-    return true;
+    // brute force
+    for (let i = 0; i < levels.length; i++) {
+        let levels_copy = Array.from(levels);
+        levels_copy.splice(i, 1);
+        if (isSafe(levels_copy, lowerBound, upperBound)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 function readInput(filepath) {
@@ -79,7 +62,7 @@ function readInput(filepath) {
     return reports;
 }
 
-let reports = readInput("example_input.txt");
+let reports = readInput("input.txt");
 console.log("Part one:");
 let counter = 0;
 for (const report of reports) {
